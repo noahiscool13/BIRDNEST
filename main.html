@@ -16,15 +16,13 @@
         crossorigin="anonymous"></script>
 
 
-
 <div class="container">
     <div class="row">
-    <h1 style="color: lightgray">Violations:</h1>
-</div>
+        <h1 style="color: lightgray">Violations:</h1>
+    </div>
     <div class="row" id="violations">
     </div>
 </div>
-
 
 
 <script>
@@ -38,7 +36,7 @@
                 let violations = document.getElementById('violations');
                 violations.innerHTML = '';
                 for (let i = 0; i < data.length; i++) {
-                    let row = document.createElement('card'+i);
+                    let row = document.createElement('card' + i);
                     row.classList.add("card")
                     row.classList.add("text-center")
                     row.classList.add("bg-light")

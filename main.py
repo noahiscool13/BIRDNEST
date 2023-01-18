@@ -14,11 +14,7 @@ from math import dist
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-origins = [
-    "*",
-]
-
-
+origins = ["*", ]
 
 app = FastAPI()
 
@@ -59,16 +55,17 @@ class Drone:
 
     @property
     def dist_to_ndz(self):
-        return dist((self.positionX, self.positionY), (250_000,250_000))
+        return dist((self.positionX, self.positionY), (250_000, 250_000))
+
 
 def make_drone_locations_request():
     try:
         url = "http://assignments.reaktor.com/birdnest/drones"
         resp = requests.get(url)
         root = ET.fromstring(resp.text)
-        return list(map(Drone.from_xml,root.find("capture").findall("drone")))
+        return list(map(Drone.from_xml, root.find("capture").findall("drone")))
     except Exception as e:
-        print("EXCEPT",e)
+        print("EXCEPT", e)
         return []
 
 
@@ -77,15 +74,15 @@ def get_pilot_info(drone):
         serial_number = drone.serialNumber
         url = f"http://assignments.reaktor.com/birdnest/pilots/{serial_number}"
         res = json.loads(requests.get(url).text)
-        return Pilot(res["pilotId"],res["firstName"],res["lastName"],res["email"],res["phoneNumber"],drone,time.time())
+        return Pilot(res["pilotId"], res["firstName"], res["lastName"], res["email"], res["phoneNumber"], drone,
+                     time.time())
     except Exception as e:
-        print("EXCEPT",e)
-        return Pilot("Unknown","Unknown","Unknown","Unknown","Unknown",drone,time.time())
-
+        print("EXCEPT", e)
+        return Pilot("Unknown", "Unknown", "Unknown", "Unknown", "Unknown", drone, time.time())
 
 
 class Pilot:
-    def __init__(self,pilot_id, first_name,last_name, email, phone, drone, last_seen):
+    def __init__(self, pilot_id, first_name, last_name, email, phone, drone, last_seen):
         self.pilot_id = pilot_id
         self.first_name = first_name
         self.last_name = last_name
@@ -105,7 +102,9 @@ class Pilot:
             "last_seen": self.last_seen
         }
 
+
 violations = dict()
+
 
 @app.get("/")
 async def root():
@@ -125,19 +124,15 @@ def update_violations():
                     violations[drone.serialNumber].drone = drone
             else:
                 violations[drone.serialNumber] = get_pilot_info(drone)
-    violations = {k:v for k,v in violations.items() if time.time() - v.last_seen < 600}
-
-    # if changed:
-    #     print("Violations:")
-    #     for k, v in violations.items():
-    #         print(v.drone.serialNumber, v.first_name, v.email, v.phone, v.drone.dist_to_ndz)
+    violations = {k: v for k, v in violations.items() if time.time() - v.last_seen < 600}
 
     time.sleep(2)
+
 
 def violation_loop():
     while True:
         update_violations()
 
+
 thread = Thread(target=violation_loop)
 thread.start()
-
